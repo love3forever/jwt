@@ -7,8 +7,8 @@ from datetime import timedelta
 from flask import Flask
 from flask_jwt import JWT
 
-from jwt_backend.user_module.user_model import User
-from jwt_backend.user_module.user_controller import bp_user_control
+from user_module.user_model import User
+from user_module.user_controller import bp_user_control
 
 app = Flask(__name__)
 
