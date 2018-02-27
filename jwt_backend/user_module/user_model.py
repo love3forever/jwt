@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2017/12/4
 # @Author  : wangmengcn@eclipse_sv@163.com
+from datetime import datetime
 
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -39,13 +40,35 @@ class User(object):
             try:
                 insert_result = col.insert_one(
                     {'username': self.username,
-                     'password': generate_password_hash(self.password)}
+                     'password': generate_password_hash(self.password),
+                     'password_last_modified': datetime.utcnow()
+                     }
                 )
             except Exception as e:
                 print(str(e))
                 return False, None
             else:
                 return True, str(insert_result.inserted_id)
+
+    @classmethod
+    def reset_password(cls, username, password, new_password):
+        is_old_password_correct, _ = cls(username, password).check_password()
+        if is_old_password_correct:
+            col.update_one({'username': username}, {
+                           '$set': {
+                               'password': generate_password_hash(new_password),
+                               'password_last_modified': datetime.utcnow()
+                           }
+                           })
+            return {
+                "msg": "password reseted!",
+                "error_code": 0
+            }
+        else:
+            return {
+                "msg": "old password is not correct!",
+                "error_code": 1
+            }
 
     @property
     def id(self):
@@ -63,3 +86,9 @@ class User(object):
             return cls(user['username'], user['password'])
         else:
             return None
+
+    def is_token_outofdate(self, token_generated_time):
+        target_user = col.find_one({'username': self.username})
+        print(token_generated_time)
+        print(target_user.get('password_last_modified'))
+        return token_generated_time < target_user.get('password_last_modified')
