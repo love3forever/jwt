@@ -25,7 +25,7 @@ class UserRegister(Resource):
             password = register_data['password']
         except Exception as e:
             print(str(e))
-            abort(503)
+            abort(400)
 
         new_user = User(username, password)
         flag, msg = new_user.gen_user()
@@ -47,6 +47,25 @@ class UserRegister(Resource):
                     'msg': 'something wrong happend'
                 }
         return make_response(jsonify(response))
+
+
+@rest_user_control.resource('/passwordreset')
+class PasswordReset(Resource):
+    """docstring for passwordreset"""
+
+    def post(self):
+        reset_data = request.get_json()
+        try:
+            username = reset_data['username']
+            password = reset_data['password']
+            new_password = reset_data['newpassword']
+        except Exception as e:
+            print(str(e))
+            abort(400)
+        msg = User.reset_password(username, password, new_password)
+        if msg.get('error_code'):
+            abort(400)
+        return make_response(jsonify(msg))
 
 
 @rest_user_control.resource('/info')

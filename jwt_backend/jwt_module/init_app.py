@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2017/12/4
 # @Author  : wangmengcn@eclipse_sv@163.com
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from flask import Flask
 from flask_jwt import JWT
@@ -26,6 +26,13 @@ def authenticate(username, password):
 def identity(payload):
     if payload:
         user_id = payload['identity']
+        token_generated_at = payload['iat']
+        print(payload)
+        print('use this function to identity user info')
+        target_user = User.gen_user_by_id(user_id)
+        if target_user.is_token_outofdate(datetime.utcfromtimestamp(token_generated_at)):
+            print('token has expired')
+            return None
         # 返回值为之后的current_identity
         return User.gen_user_by_id(user_id)
     else:
