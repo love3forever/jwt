@@ -16,7 +16,10 @@ import Login from './components/login'
 import Logout from './components/logout'
 import PasswordReset from './components/passwordreset'
 import Register from './components/register'
+<<<<<<< HEAD
 import PublicPage from './components/public'
+=======
+>>>>>>> 4456a8699933a1bb23d4843dcf0f140d5fd0191c
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createHistory()
