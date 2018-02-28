@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux'
-import { withRouter } from 'react-router-dom'
+import { withRouter,Link } from 'react-router-dom'
 
 import { doLogin } from '../apis/auth'
 
@@ -66,6 +66,12 @@ class LoginPage extends Component {
                     {/* <input type="submit" value="Submit" /> */}
                     <button onClick={this.handleLogin}>Submit</button>
                 </form>
+
+                <ul>
+                    <li>
+                        <Link to='/register'>Register</Link>
+                    </li>
+                </ul>
             </div>
         )
     }

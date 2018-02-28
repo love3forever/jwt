@@ -15,6 +15,7 @@ import App from './components/app'
 import Login from './components/login'
 import Logout from './components/logout'
 import PasswordReset from './components/passwordreset'
+import Register from './components/register'
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createHistory()
@@ -44,6 +45,7 @@ ReactDOM.render(
                 <Route path="/login" component={Login} />
                 <Route path="/logout" component={Logout} />
                 <Route path="/reset" component={PasswordReset} />
+                <Route path="/register" component={Register}></Route>
             </div>
         </ConnectedRouter>
     </Provider>,

@@ -17,3 +17,8 @@ export const doResetPassword = (token, oldpassword, newpassword) => (
     axios.post(PasswordResetURL, { password: oldpassword, newpassword: newpassword },
         { headers: { Authorization: `JWT ${token}` } })
 )
+
+const RegisterUrl = `${HOST}/user/register`
+export const doRegister = (username, password) => (
+    axios.post(RegisterUrl, { username, password })
+)
