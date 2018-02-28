@@ -4,11 +4,11 @@
 # @Author  : wangmengcn@eclipse_sv@163.com
 from datetime import datetime
 
-from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
 
-client = MongoClient()
+from db_module import client
+
 db = client['auth']
 col = db['user_module']
 
@@ -41,7 +41,7 @@ class User(object):
                 insert_result = col.insert_one(
                     {'username': self.username,
                      'password': generate_password_hash(self.password),
-                     'password_last_modified': datetime.utcnow()
+                     'token_last_modified': datetime.utcnow()
                      }
                 )
             except Exception as e:
@@ -57,7 +57,7 @@ class User(object):
             col.update_one({'username': username}, {
                            '$set': {
                                'password': generate_password_hash(new_password),
-                               'password_last_modified': datetime.utcnow()
+                               'token_last_modified': datetime.utcnow()
                            }
                            })
             return {
@@ -70,6 +70,27 @@ class User(object):
                 "error_code": 1
             }
 
+    @classmethod
+    def reset_token_last_modified(cls, username):
+        current_user = col.find_one({'username': username})
+        if current_user:
+            col.update_one({
+                'username': username
+            }, {
+                '$set': {
+                    'token_last_modified': datetime.utcnow()
+                }
+            })
+            return {
+                'msg': 'user logout!',
+                'error_code': 0
+            }
+        else:
+            return {
+                'msg': 'failed to logout!',
+                'error_code': 1
+            }
+
     @property
     def id(self):
         flag, _id = self.check_password()
@@ -79,7 +100,7 @@ class User(object):
             return None
 
     @classmethod
-    def gen_user_by_id(cls, user_id):
+    def get_user_by_id(cls, user_id):
         _id = ObjectId(user_id)
         user = col.find_one({"_id": _id})
         if user is not None:
@@ -89,6 +110,4 @@ class User(object):
 
     def is_token_outofdate(self, token_generated_time):
         target_user = col.find_one({'username': self.username})
-        print(token_generated_time)
-        print(target_user.get('password_last_modified'))
-        return token_generated_time < target_user.get('password_last_modified')
+        return token_generated_time < target_user.get('token_last_modified')
