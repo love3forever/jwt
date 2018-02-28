@@ -22,3 +22,8 @@ const RegisterUrl = `${HOST}/user/register`
 export const doRegister = (username, password) => (
     axios.post(RegisterUrl, { username, password })
 )
+
+const UserInfoUrl = `${HOST}/user/info`
+export const doGetUserInfo = (token) => (
+    axios.get(UserInfoUrl, { headers: { Authorization: `JWT ${token}` } })
+)
