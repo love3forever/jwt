@@ -51,18 +51,37 @@ class UserRegister(Resource):
 
 @rest_user_control.resource('/passwordreset')
 class PasswordReset(Resource):
-    """docstring for passwordreset"""
-
+    """用户重置密码"""
+    @jwt_required()
     def post(self):
         reset_data = request.get_json()
+        current_user = current_identity
         try:
-            username = reset_data['username']
+            username = current_user.username
             password = reset_data['password']
             new_password = reset_data['newpassword']
         except Exception as e:
             print(str(e))
             abort(400)
         msg = User.reset_password(username, password, new_password)
+        if msg.get('error_code'):
+            print(msg)
+            abort(400, message=msg.get('msg'))
+        return make_response(jsonify(msg))
+
+
+@rest_user_control.resource('/logout')
+class UserLogOut(Resource):
+    """用户登出操作"""
+    @jwt_required()
+    def post(self):
+        current_user = current_identity
+        try:
+            username = current_user.username
+        except Exception as e:
+            print(str(e))
+            abort(400)
+        msg = User.reset_token_last_modified(username)
         if msg.get('error_code'):
             abort(400)
         return make_response(jsonify(msg))

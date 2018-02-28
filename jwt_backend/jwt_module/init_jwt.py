@@ -3,14 +3,7 @@
 # @Date    : 2017/12/4
 # @Author  : wangmengcn@eclipse_sv@163.com
 from datetime import timedelta, datetime
-
-from flask import Flask
-from flask_jwt import JWT
-
 from user_module.user_model import User
-from user_module.user_controller import bp_user_control
-
-app = Flask(__name__)
 
 
 # JWT相关配置
@@ -29,12 +22,15 @@ def identity(payload):
         token_generated_at = payload['iat']
         print(payload)
         print('use this function to identity user info')
-        target_user = User.gen_user_by_id(user_id)
-        if target_user.is_token_outofdate(datetime.utcfromtimestamp(token_generated_at)):
+        target_user = User.get_user_by_id(user_id)
+        # 用以确保用户重置密码之后之前的token不被认证
+        if target_user.is_token_outofdate(
+            datetime.utcfromtimestamp(token_generated_at)
+        ):
             print('token has expired')
             return None
         # 返回值为之后的current_identity
-        return User.gen_user_by_id(user_id)
+        return target_user
     else:
         return None
 
@@ -48,14 +44,3 @@ JWT_CONFIG = {
     'JWT_AUTH_URL_RULE': '/api/v1/auth',
     'JWT_EXPIRATION_DELTA': timedelta(days=1)
 }
-
-
-def create_app():
-    # jwt配置
-    app.config.update(JWT_CONFIG)
-    jwt = JWT(app, authenticate, identity)
-    jwt.jwt_error_handler(jwt_error_handler)
-
-    # 注册blueprint
-    app.register_blueprint(bp_user_control)
-    return app
